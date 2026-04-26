@@ -468,12 +468,11 @@
 <script>
   /* ── Mixpanel ── */
   const MIXPANEL_TOKEN = '83e4770e15619c6bc16a6587d24652d3';
-  if (MIXPANEL_TOKEN !== 'YOUR_MIXPANEL_TOKEN') {
+  if (typeof mixpanel !== 'undefined') {
     mixpanel.init(MIXPANEL_TOKEN, { track_pageview: false });
   }
   function track(event, props) {
-    if (MIXPANEL_TOKEN === 'YOUR_MIXPANEL_TOKEN') return;
-    try { mixpanel.track(event, props); } catch(e) {}
+    try { if (typeof mixpanel !== 'undefined') mixpanel.track(event, props); } catch(e) {}
   }
 
   /* ── Supabase ── */
