@@ -420,6 +420,49 @@
 </div>
 
 
+<!-- Welcome popup -->
+<div class="modal-overlay" id="welcomeOverlay">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-handle"></div>
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:2.6rem;margin-bottom:8px">🌅</div>
+      <div style="font-size:1.3rem;font-weight:900;color:var(--text);margin-bottom:6px">Welcome to Afterglow</div>
+      <div style="font-size:0.82rem;font-weight:700;color:var(--muted);line-height:1.55">Your daily mood journal</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:24px">
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="font-size:1.4rem;flex-shrink:0">📅</div>
+        <div>
+          <div style="font-size:0.88rem;font-weight:900;color:var(--text);margin-bottom:2px">Build a daily habit</div>
+          <div style="font-size:0.8rem;font-weight:600;color:var(--muted);line-height:1.5">Just 10 seconds a day. The more consistently you log, the clearer your emotional patterns become over weeks and months.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="font-size:1.4rem;flex-shrink:0">🔍</div>
+        <div>
+          <div style="font-size:0.88rem;font-weight:900;color:var(--text);margin-bottom:2px">Understand yourself better</div>
+          <div style="font-size:0.8rem;font-weight:600;color:var(--muted);line-height:1.5">Spot which days of the week lift you up or drag you down, and connect your mood to what's happening in your life.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="font-size:1.4rem;flex-shrink:0">✍️</div>
+        <div>
+          <div style="font-size:0.88rem;font-weight:900;color:var(--text);margin-bottom:2px">The power of journaling</div>
+          <div style="font-size:0.8rem;font-weight:600;color:var(--muted);line-height:1.5">Writing even a single line about your day reduces stress, improves emotional clarity, and helps you process experiences rather than carry them.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="font-size:1.4rem;flex-shrink:0">📈</div>
+        <div>
+          <div style="font-size:0.88rem;font-weight:900;color:var(--text);margin-bottom:2px">Watch your progress</div>
+          <div style="font-size:0.8rem;font-weight:600;color:var(--muted);line-height:1.5">Your stats and charts grow richer with every entry — streaks, averages, and trends that tell the story of your year.</div>
+        </div>
+      </div>
+    </div>
+    <button id="welcomeDismiss" class="btn btn-save" style="width:100%;border-radius:14px">Got it, let's go ✨</button>
+  </div>
+</div>
+
 <!-- Modal -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
@@ -661,6 +704,37 @@
   document.getElementById('closeBtn').addEventListener('click', closeModal);
   overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  // Swipe-down to dismiss modal
+  (function () {
+    const modalEl = overlay.querySelector('.modal');
+    let startY = 0, currentY = 0, dragging = false;
+
+    modalEl.addEventListener('touchstart', e => {
+      startY = e.touches[0].clientY;
+      currentY = startY;
+      dragging = true;
+      modalEl.style.transition = 'none';
+    }, { passive: true });
+
+    modalEl.addEventListener('touchmove', e => {
+      if (!dragging) return;
+      currentY = e.touches[0].clientY;
+      const delta = Math.max(0, currentY - startY);
+      modalEl.style.transform = `translateY(${delta}px)`;
+    }, { passive: true });
+
+    modalEl.addEventListener('touchend', () => {
+      if (!dragging) return;
+      dragging = false;
+      modalEl.style.transition = '';
+      if (currentY - startY > 80) {
+        closeModal();
+      } else {
+        modalEl.style.transform = '';
+      }
+    });
+  })();
 
   /* ── Statistics helpers ── */
   function getFilteredEntries(filter) {
@@ -1281,7 +1355,15 @@
     renderLineChart();
     if (session) subscribeRealtime(session.user.id);
     else document.getElementById('syncBanner').style.display = 'flex';
+    if (!localStorage.getItem('welcomeSeen')) {
+      document.getElementById('welcomeOverlay').classList.add('open');
+    }
   }
+
+  document.getElementById('welcomeDismiss').addEventListener('click', () => {
+    document.getElementById('welcomeOverlay').classList.remove('open');
+    localStorage.setItem('welcomeSeen', '1');
+  });
 
   function showAsGuest() {
     data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
