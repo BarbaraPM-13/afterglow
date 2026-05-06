@@ -1380,6 +1380,7 @@
   function showAsGuest() {
     data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
     isGuest = true;
+    localStorage.setItem('guestMode', '1');
     showApp(null);
   }
 
@@ -1427,14 +1428,22 @@ document.getElementById('guestBtn').addEventListener('click', () => {
     }
     _supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && !currentSession) {
+        localStorage.removeItem('guestMode');
         await loadAllEntries(session);
         showApp(session);
+      }
+      if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('guestMode');
+        document.getElementById('authScreen').style.display = 'flex';
+        document.getElementById('appRoot').style.display = 'none';
       }
     });
     const { data: { session } } = await _supabase.auth.getSession();
     if (session) {
       await loadAllEntries(session);
       showApp(session);
+    } else if (localStorage.getItem('guestMode')) {
+      showAsGuest();
     } else {
       document.getElementById('authScreen').style.display = 'flex';
     }
