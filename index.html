@@ -93,14 +93,15 @@
     }
     .day-cell:hover { transform: scale(1.08); box-shadow: 0 4px 16px rgba(108,99,255,0.18); }
     .day-cell.empty { background: transparent; cursor: default; pointer-events: none; }
+    .day-cell.future { opacity: 0.3; cursor: default; pointer-events: none; }
     .day-cell.today { border-color: var(--accent); box-shadow: 0 0 0 2px #6c63ff44; }
     .day-cell.has-grade { color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.25); }
     .day-num { line-height: 1; }
     .day-grade { font-size: 1em; font-weight: 900; line-height: 1; margin-top: 1px; min-height: 0.9em; visibility: hidden; opacity: 0.9; }
     .day-grade.visible { visibility: visible; }
-    .day-note-icon { visibility: hidden; position: absolute; bottom: 3px; right: 4px; line-height: 1; }
+    .day-note-icon { visibility: hidden; position: absolute; bottom: 2px; right: 3px; line-height: 1; }
     .day-note-icon.visible { visibility: visible; }
-    .day-note-icon svg { display: block; }
+    .day-note-icon svg { display: block; width: 8px; height: 8px; }
 
     /* Modal */
     .modal-overlay {
@@ -626,16 +627,20 @@
       const entry = data[key];
       const isToday = d === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear();
 
+      const cellDate  = new Date(viewYear, viewMonth, d);
+      const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const isFuture  = cellDate > todayMidnight;
+
       const cell = document.createElement('div');
-      cell.className = 'day-cell' + (isToday ? ' today' : '') + (entry?.grade ? ' has-grade' : '');
+      cell.className = 'day-cell' + (isToday ? ' today' : '') + (entry?.grade ? ' has-grade' : '') + (isFuture ? ' future' : '');
       if (entry?.grade) cell.style.background = gradeColor(entry.grade);
 
       cell.innerHTML =
         `<span class="day-num">${d}</span>` +
         `<span class="day-grade${entry?.grade ? ' visible' : ''}">${entry?.grade || '·'}</span>` +
-        `<span class="day-note-icon${entry?.note ? ' visible' : ''}"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>`;
+        `<span class="day-note-icon${entry?.note ? ' visible' : ''}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>`;
 
-      cell.addEventListener('click', () => openModal(key, d));
+      if (!isFuture) cell.addEventListener('click', () => openModal(key, d));
       grid.appendChild(cell);
     }
   }
