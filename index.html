@@ -1503,9 +1503,19 @@ document.getElementById('guestBtn').addEventListener('click', () => {
         showAuthScreen();
       }
     });
-    const { data: { session } } = await _supabase.auth.getSession();
+    let session;
+    try {
+      const result = await Promise.race([
+        _supabase.auth.getSession(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+      ]);
+      session = result.data.session;
+    } catch (e) {
+      session = null;
+    }
+
     if (session) {
-      await loadAllEntries(session);
+      try { await loadAllEntries(session); } catch(e) {}
       showApp(session);
     } else if (localStorage.getItem('guestMode')) {
       showAsGuest();
