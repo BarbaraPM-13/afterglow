@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Primary SEO -->
-  <title>Afterglow — Daily Mood Tracker & Journal</title>
+  <title>Afterglow - Track your mood daily</title>
   <meta name="description" content="Track your mood every day, spot patterns over time, and understand yourself better. Afterglow is a beautiful, private mood journal with grades, notes, and insights." />
   <meta name="keywords" content="mood tracker, mood journal, daily mood, mental health, habit tracker, journaling, mood log, self awareness, mood calendar" />
   <meta name="author" content="Afterglow" />
@@ -130,6 +130,10 @@
     .day-note-icon { visibility: hidden; position: absolute; bottom: 2px; right: 3px; line-height: 1; }
     .day-note-icon.visible { visibility: visible; }
     .day-note-icon svg { display: block; width: 8px; height: 8px; }
+    @media (min-width: 600px) {
+      .day-note-icon { bottom: 4px; right: 5px; }
+      .day-note-icon svg { width: 13px; height: 13px; opacity: 0.7; }
+    }
 
     /* Modal */
     .modal-overlay {
