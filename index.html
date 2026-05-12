@@ -582,7 +582,9 @@
   const SUPABASE_URL  = 'https://jcdmuoruvbtjvutisand.supabase.co';
   const SUPABASE_ANON = 'sb_publishable_c9owR3izARLh3w02lV9_sg_5XMvS8Iu';
   const supabaseReady = SUPABASE_URL !== 'YOUR_SUPABASE_URL';
-  const _supabase = supabaseReady ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON) : null;
+  const _supabase = supabaseReady ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  }) : null;
   let currentSession = null;
 
   /* ── Constants ── */
@@ -1492,17 +1494,9 @@ document.getElementById('guestBtn').addEventListener('click', () => {
       showAuthScreen();
       return;
     }
-    _supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && !currentSession) {
-        localStorage.removeItem('guestMode');
-        await loadAllEntries(session);
-        showApp(session);
-      }
-      if (event === 'SIGNED_OUT') {
-        localStorage.removeItem('guestMode');
-        showAuthScreen();
-      }
-    });
+
+    // Wait for the initial session before registering state changes
+    // so SIGNED_OUT events during token refresh don't kick users out
     let session;
     try {
       const result = await Promise.race([
@@ -1522,6 +1516,23 @@ document.getElementById('guestBtn').addEventListener('click', () => {
     } else {
       showAuthScreen();
     }
+
+    // Only listen for future auth changes after initial load is done
+    _supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN') {
+        localStorage.removeItem('guestMode');
+        await loadAllEntries(session);
+        showApp(session);
+      }
+      if (event === 'TOKEN_REFRESHED' && session) {
+        currentSession = session;
+      }
+      if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('guestMode');
+        currentSession = null;
+        showAuthScreen();
+      }
+    });
   })();
 </script>
 </body>
