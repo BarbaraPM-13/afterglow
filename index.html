@@ -1004,11 +1004,14 @@
     const W = 600, H = 180, PL = 38, PR = 12, PT = 14, PB = 30;
     const iW = W - PL - PR, iH = H - PT - PB;
     const yPos = s => PT + iH - ((s - 1) / 5) * iH;
+    const isMobile = window.innerWidth < 600;
+    const dotR     = isMobile ? 7 : 5;
+    const fontSize = isMobile ? 11 : 9;
 
     const gridLines = GRADES.map(({ grade, color }) => {
       const s = GRADE_SCORE[grade];
       return `<line x1="${PL}" y1="${yPos(s)}" x2="${PL+iW}" y2="${yPos(s)}" stroke="#f0f0f0" stroke-width="1"/>
-              <text x="${PL-6}" y="${yPos(s)+4}" text-anchor="end" font-size="9" font-weight="700" fill="${color}" font-family="Nunito,sans-serif">${grade}</text>`;
+              <text x="${PL-6}" y="${yPos(s)+4}" text-anchor="end" font-size="${fontSize}" font-weight="700" fill="${color}" font-family="Nunito,sans-serif">${grade}</text>`;
     }).join('');
 
     let points = [], xTicks = [];
@@ -1023,7 +1026,7 @@
         return { px: xForDay(d), score: GRADE_SCORE[v.grade], grade: v.grade, label: fmtDate(k) };
       });
       for (let d = 1; d <= daysInMo; d += 5)
-        xTicks.push(`<text x="${xForDay(d)}" y="${H-6}" text-anchor="middle" font-size="9" font-weight="700" fill="#9ca3af" font-family="Nunito,sans-serif">${d}</text>`);
+        xTicks.push(`<text x="${xForDay(d)}" y="${H-6}" text-anchor="middle" font-size="${fontSize}" font-weight="700" fill="#9ca3af" font-family="Nunito,sans-serif">${d}</text>`);
 
     } else if (activeFilter === '3months') {
       // Day-by-day across 3 months
@@ -1038,7 +1041,7 @@
       });
       for (let i = 0; i < 3; i++) {
         const d = new Date(now.getFullYear(), now.getMonth() - 2 + i, 1);
-        xTicks.push(`<text x="${xForDate(d)}" y="${H-6}" text-anchor="middle" font-size="9" font-weight="700" fill="#9ca3af" font-family="Nunito,sans-serif">${MONTHS[d.getMonth()].slice(0,3)}</text>`);
+        xTicks.push(`<text x="${xForDate(d)}" y="${H-6}" text-anchor="middle" font-size="${fontSize}" font-weight="700" fill="#9ca3af" font-family="Nunito,sans-serif">${MONTHS[d.getMonth()].slice(0,3)}</text>`);
       }
 
     } else {
@@ -1060,7 +1063,7 @@
       xTicks = months.map((ym, i) => {
         const [y, m] = ym.split('-').map(Number);
         const lbl    = (n > 8 ? MONTHS[m-1][0] : MONTHS[m-1].slice(0,3)) + (activeFilter === 'all' && n > 12 ? ` '${String(y).slice(2)}` : '');
-        return `<text x="${xForIdx(i)}" y="${H-6}" text-anchor="middle" font-size="9" font-weight="700" fill="#9ca3af" font-family="Nunito,sans-serif">${lbl}</text>`;
+        return `<text x="${xForIdx(i)}" y="${H-6}" text-anchor="middle" font-size="${fontSize}" font-weight="700" fill="#9ca3af" font-family="Nunito,sans-serif">${lbl}</text>`;
       });
     }
 
@@ -1072,7 +1075,7 @@
       points.slice(1).map(p => `L${p.px.toFixed(1)},${yPos(p.score).toFixed(1)}`).join(' ') +
       ` L${last.px.toFixed(1)},${(PT+iH).toFixed(1)} L${first.px.toFixed(1)},${(PT+iH).toFixed(1)} Z`;
     const dots = points.map(p =>
-      `<circle cx="${p.px.toFixed(1)}" cy="${yPos(p.score).toFixed(1)}" r="5" fill="${gradeColor(p.grade)}" stroke="#fff" stroke-width="2"><title>${p.label}: ${p.grade}</title></circle>`
+      `<circle cx="${p.px.toFixed(1)}" cy="${yPos(p.score).toFixed(1)}" r="${dotR}" fill="${gradeColor(p.grade)}" stroke="#fff" stroke-width="2"><title>${p.label}: ${p.grade}</title></circle>`
     ).join('');
 
     wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
